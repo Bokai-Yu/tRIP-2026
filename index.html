@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>中歐九日行程・Wien→Salzburg→Königssee→Budapest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --surface:#F7F8F4;
+    --surface-2:#F1F3EC;
+    --ink:#1A1C1A;
+    --ink-soft:#767E73;
+    --ink-faint:#A9AFA3;
+    --line:#E7E9E1;
+    --wien:#E23A56;
+    --wien-soft:#FCE8EB;
+    --salzburg:#2E9A4A;
+    --salzburg-soft:#E7F5EA;
+    --konig:#1C7ED6;
+    --konig-soft:#E5F1FC;
+    --budapest:#E2660F;
+    --budapest-soft:#FBEBDD;
+    --gold:#C99A2E;
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:9px;
+    --shadow:0 1px 3px rgba(20,20,15,0.05), 0 8px 24px rgba(20,20,15,0.05);
+    --font-display:'Fraunces', Georgia, serif;
+    --font-body:'Inter', -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--surface);}
+  body{
+    font-family:var(--font-body);
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+  }
+  #app{
+    width:100%;
+    max-width:460px;
+    min-height:100vh;
+    background:var(--bg);
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 0 40px rgba(0,0,0,0.06);
+  }
+
+  /* ---------- Header & route stepper (signature element) ---------- */
+  header.top{
+    position:sticky; top:0; z-index:30;
+    background:rgba(255,255,255,0.92);
+    backdrop-filter:blur(10px);
+    padding:14px 20px 12px;
+    border-bottom:1px solid var(--line);
+  }
+  .eyebrow{
+    font-size:11px; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--ink-soft); font-weight:600; margin:0 0 2px;
+  }
+  h1.trip-title{
+    font-family:var(--font-display);
+    font-size:20px; font-weight:600; margin:0 0 12px; letter-spacing:0.01em;
+  }
+  .route-line{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    position:relative; padding:0 2px;
+  }
+  .route-line::before{
+    content:''; position:absolute; top:7px; left:16px; right:16px; height:2px;
+    background:var(--line); z-index:0;
+  }
+  .route-node{
+    position:relative; z-index:1; display:flex; flex-direction:column; align-items:center;
+    gap:6px; background:none; border:none; font-family:var(--font-body);
+    cursor:pointer; flex:1; padding:0;
+  }
+  .route-dot{
+    width:16px; height:16px; border-radius:50%; background:var(--bg);
+    border:2px solid var(--line); transition:all .25s ease;
+  }
+  .route-node.active .route-dot{
+    background:var(--dot-color, var(--ink)); border-color:var(--dot-color, var(--ink));
+    box-shadow:0 0 0 4px color-mix(in srgb, var(--dot-color, var(--ink)) 18%, transparent);
+  }
+  .route-label{
+    font-size:10.5px; font-weight:600; color:var(--ink-faint); white-space:nowrap;
+    letter-spacing:0.01em;
+  }
+  .route-node.active .route-label{ color:var(--ink); }
+
+  /* ---------- Main scroll area ---------- */
+  main{ flex:1; padding:18px 20px 110px; overflow-x:hidden; }
+  .page{ display:none; animation:fadeIn .2s ease; }
+  .page.active{ display:block; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);} }
+
+  section.block{ margin-bottom:28px; }
+  h2.page-title{
+    font-family:var(--font-display); font-size:24px; font-weight:600; margin:2px 0 4px;
+  }
+  p.page-sub{ font-size:13px; color:var(--ink-soft); margin:0 0 18px; line-height:1.5;}
+
+  /* ---------- Day pills (itinerary tab) ---------- */
+  .day-pills{
+    display:flex; gap:8px; overflow-x:auto; padding:2px 2px 14px; margin:0 -2px 6px;
+    scrollbar-width:none;
+  }
+  .day-pills::-webkit-scrollbar{ display:none; }
+  .day-pill{
+    flex:0 0 auto; padding:8px 14px; border-radius:999px; border:1.5px solid var(--line);
+    background:var(--bg); font-size:12.5px; font-weight:600; color:var(--ink-soft);
+    cursor:pointer; white-space:nowrap; font-family:var(--font-body);
+  }
+  .day-pill.active{ color:#fff; border-color:transparent; }
+
+  .day-header{
+    display:flex; align-items:baseline; gap:10px; margin:6px 0 4px;
+  }
+  .day-num{ font-family:var(--font-display); font-size:34px; font-weight:600; line-height:1; }
+  .day-meta{ display:flex; flex-direction:column; gap:2px; }
+  .day-city{ font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; }
+  .day-date{ font-size:12px; color:var(--ink-soft); }
+  .day-caption{ font-size:14px; font-weight:600; margin:10px 0 16px; color:var(--ink); }
+
+  .timeline{ position:relative; padding-left:20px; }
+  .timeline::before{
+    content:''; position:absolute; left:5px; top:6px; bottom:6px; width:2px; background:var(--line);
+  }
+  .t-item{ position:relative; padding-bottom:20px; }
+  .t-item:last-child{ padding-bottom:0; }
+  .t-dot{
+    position:absolute; left:-20px; top:3px; width:12px; height:12px; border-radius:50%;
+    background:var(--dot-color, var(--ink)); border:2px solid var(--bg); box-shadow:0 0 0 1.5px var(--dot-color, var(--ink));
+  }
+  .t-time{ font-size:11.5px; font-weight:700; color:var(--ink-soft); font-variant-numeric:tabular-nums; margin-bottom:2px; }
+  .t-title{ font-size:14.5px; font-weight:600; line-height:1.4; }
+  .t-note{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; line-height:1.5; }
+  .t-map{
+    display:inline-flex; align-items:center; gap:4px; margin-top:7px; font-size:11.5px;
+    font-weight:600; color:var(--dot-color, var(--ink)); text-decoration:none; padding:5px 10px;
+    background:var(--chip-bg, var(--surface-2)); border-radius:999px;
+  }
+  .t-map svg{ width:12px; height:12px; }
+
+  .day-foot{
+    margin-top:18px; padding:14px 16px; background:var(--surface); border-radius:var(--radius-md);
+    font-size:12.5px; color:var(--ink-soft); line-height:1.7;
+  }
+  .day-foot b{ color:var(--ink); }
+
+  /* ---------- Generic cards ---------- */
+  .card{
+    background:var(--bg); border:1px solid var(--line); border-radius:var(--radius-md);
+    padding:16px; margin-bottom:12px; box-shadow:var(--shadow);
+  }
+  .card-head{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .card-icon{
+    width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    background:var(--chip-bg, var(--surface-2)); color:var(--dot-color, var(--ink)); flex:0 0 auto;
+  }
+  .card-icon svg{ width:17px; height:17px; }
+  .card-title{ font-size:14.5px; font-weight:700; }
+  .card-sub{ font-size:12px; color:var(--ink-soft); margin-top:1px;}
+  .kv{ display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-top:1px solid var(--line); font-size:12.5px;}
+  .kv:first-of-type{ border-top:none; }
+  .kv .k{ color:var(--ink-soft); flex:0 0 auto; }
+  .kv .v{ text-align:right; font-weight:600; }
+  .tag{
+    display:inline-block; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:999px;
+    background:var(--chip-bg, var(--surface-2)); color:var(--dot-color, var(--ink)); margin-bottom:8px;
+  }
+  .btn-link{
+    display:inline-flex; align-items:center; gap:5px; margin-top:10px; font-size:12.5px; font-weight:700;
+    color:var(--dot-color, var(--ink)); text-decoration:none; padding:8px 12px; border-radius:var(--radius-sm);
+    background:var(--chip-bg, var(--surface-2)); width:fit-content;
+  }
+  .btn-link svg{ width:13px; height:13px; }
+
+  /* ---------- Budget ---------- */
+  .budget-total{
+    background:var(--ink); color:#fff; border-radius:var(--radius-lg); padding:22px 20px; margin-bottom:20px;
+  }
+  .budget-total .label{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; opacity:0.65; font-weight:600; }
+  .budget-total .amount{ font-family:var(--font-display); font-size:32px; font-weight:600; margin-top:6px; }
+  .budget-total .note{ font-size:11.5px; opacity:0.6; margin-top:6px; line-height:1.5; }
+  .bud-row{ display:flex; align-items:center; gap:12px; padding:11px 0; border-top:1px solid var(--line); }
+  .bud-row:first-child{ border-top:none; }
+  .bud-day{ width:34px; font-family:var(--font-display); font-weight:600; font-size:16px; flex:0 0 auto; }
+  .bud-bar-wrap{ flex:1; height:6px; background:var(--surface-2); border-radius:4px; overflow:hidden; }
+  .bud-bar{ height:100%; border-radius:4px; }
+  .bud-amt{ font-size:12px; font-weight:700; color:var(--ink-soft); width:78px; text-align:right; flex:0 0 auto; }
+
+  /* ---------- Packing checklist ---------- */
+  .pack-group{ margin-bottom:18px; }
+  .pack-group h3{ font-size:13px; font-weight:700; margin:0 0 10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.06em;}
+  .pack-item{
+    display:flex; align-items:center; gap:11px; padding:10px 2px; border-bottom:1px solid var(--line); cursor:pointer;
+  }
+  .pack-item:last-child{ border-bottom:none; }
+  .pack-box{
+    width:19px; height:19px; border-radius:6px; border:2px solid var(--line); flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center; transition:all .15s ease;
+  }
+  .pack-box svg{ width:12px; height:12px; opacity:0; transition:opacity .15s ease; }
+  .pack-item.checked .pack-box{ background:var(--ink); border-color:var(--ink); }
+  .pack-item.checked .pack-box svg{ opacity:1; }
+  .pack-text{ font-size:13.5px; flex:1; transition:color .15s ease; }
+  .pack-item.checked .pack-text{ color:var(--ink-faint); text-decoration:line-through; }
+  .pack-progress{ font-size:12px; color:var(--ink-soft); margin-bottom:14px; font-weight:600;}
+
+  /* ---------- Info tab ---------- */
+  .info-section{ margin-bottom:22px; }
+  .info-section h3{ font-size:14px; font-weight:700; margin:0 0 8px; display:flex; align-items:center; gap:8px;}
+  .info-section h3 svg{ width:16px; height:16px; color:var(--gold);}
+  .info-section p, .info-section li{ font-size:13px; color:var(--ink-soft); line-height:1.7; margin:0 0 4px;}
+  .info-section ul{ margin:0; padding-left:18px; }
+
+  /* ---------- Bottom nav ---------- */
+  nav.bottom{
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:460px; background:rgba(255,255,255,0.94); backdrop-filter:blur(12px);
+    border-top:1px solid var(--line); display:flex; padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+    z-index:40;
+  }
+  .nav-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:none;
+    color:var(--ink-faint); font-family:var(--font-body); cursor:pointer; padding:4px 0;
+  }
+  .nav-btn svg{ width:20px; height:20px; }
+  .nav-btn span{ font-size:9.5px; font-weight:600; letter-spacing:0.01em; }
+  .nav-btn.active{ color:var(--ink); }
+
+  ::selection{ background:var(--wien-soft); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="top">
+    <p class="eyebrow">2026.08.01 — 08.09 · 2人行</p>
+    <h1 class="trip-title">維也納・薩爾茲堡・國王湖・布達佩斯</h1>
+    <div class="route-line" id="routeLine"></div>
+  </header>
+
+  <main id="main"></main>
+
+  <nav class="bottom" id="bottomNav"></nav>
+</div>
+
+<script>
+/* ============================= DATA ============================= */
+const CITY = {
+  wien:  {label:'維也納', color:'var(--wien)',  soft:'var(--wien-soft)'},
+  salzburg: {label:'薩爾茲堡', color:'var(--salzburg)', soft:'var(--salzburg-soft)'},
+  konig: {label:'國王湖', color:'var(--konig)', soft:'var(--konig-soft)'},
+  budapest: {label:'布達佩斯', color:'var(--budapest)', soft:'var(--budapest-soft)'}
+};
+
+const ROUTE = [
+  {id:'wien', label:'維也納', city:'wien'},
+  {id:'salzburg', label:'薩爾茲堡', city:'salzburg'},
+  {id:'budapest', label:'布達佩斯', city:'budapest'},
+  {id:'return', label:'返回維也納', city:'wien'}
+];
+
+function mapUrl(q){ return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(q); }
+
+const DAYS = [
+{num:1, date:'8/1（六）', city:'wien', caption:'抵達維也納・音樂會之夜', stay:'Leonardo Hotel Vienna Hauptbahnhof',
+  items:[
+    {time:'06:55', title:'抵達維也納國際機場', note:'Vienna International Airport'},
+    {time:'07:30', title:'搭乘 CAT機場快線 前往 Wien Mitte', note:'16分鐘／€14.9每人'},
+    {time:'07:46', title:'Wien Mitte 站內轉乘 S2', note:'同系統轉乘，不需出站，等候約5-10分'},
+    {time:'約08:00', title:'S2 抵達 Wien Hauptbahnhof', note:'車程約5-8分／€2.4每人'},
+    {time:'08:10', title:'步行前往 Leonardo Hotel，寄放行李', note:'步行約5-8分鐘', map:'Leonardo Hotel Vienna Hauptbahnhof'},
+    {time:'09:00-14:00', title:'自由活動', note:'長途飛行後不宜安排太緊湊，建議飯店附近輕鬆走走、補眠調時差'},
+    {time:'15:00', title:'正式 Check-in', note:'Gerhard-Bronner-Straße 5, 1100 Vienna'},
+    {time:'15:30-18:30', title:'自由活動', note:'可安排 Café Sacher 喝咖啡、周邊散步', map:'Café Sacher Wien'},
+    {time:'19:00', title:'前往音樂協會 Musikverein', map:'Musikverein Wien'},
+    {time:'20:15-22:00', title:'🎻 Wiener Mozart Orchester 音樂會', note:'3人（含友人）・Parterre rechts 排15 座7-9'},
+    {time:'22:00後', title:'音樂會後晚餐或宵夜', note:'附近餐廳'}
+  ],
+  budget:'交通 €10-15／餐飲 €40-60／已付：音樂會、住宿'
+},
+{num:2, date:'8/2（日）', city:'wien', caption:'美景宮・換飯店・陪友人辦事・Ribs晚餐', stay:'Ibis Wien Messe',
+  items:[
+    {time:'08:00-09:00', title:'🍳 飯店早餐（已訂）', note:'Leonardo Hotel'},
+    {time:'09:00', title:'退房，行李寄放櫃檯'},
+    {time:'09:15', title:'步行前往美景宮', note:'約15-20分鐘，Leonardo Hotel 就在附近'},
+    {time:'09:30-12:00', title:'🖼️ 美景宮 Belvedere（上宮）', note:'門票建議先線上預約', map:'Belvedere Vienna'},
+    {time:'12:00-13:00', title:'午餐'},
+    {time:'13:00-13:30', title:'步行返回 Leonardo Hotel，取回行李'},
+    {time:'13:30-14:00', title:'前往 Ibis Wien Messe 辦理入住', note:'Lassallestrasse 7a, 1020 Vienna，15:00後正式入住'},
+    {time:'14:00-17:00', title:'陪友人前往 Garnisongasse 放行李', map:'Garnisongasse Vienna'},
+    {time:'17:00-17:30', title:'🛒 INTERSPAR am Schottentor 採買', note:'離Garnisongasse不遠，順路', map:'INTERSPAR Schottentor'},
+    {time:'17:30-19:30', title:'自由活動', note:'附近散步、逛街'},
+    {time:'19:30', title:'前往 Ribs of Vienna', note:'Weihburggasse 22, 1010 Wien'},
+    {time:'20:00-22:00', title:'🍖 Ribs of Vienna 晚餐', note:'3人', map:'Ribs of Vienna'}
+  ],
+  budget:'門票（Belvedere約€17-20/人）／交通 €8／餐飲已含晚餐訂位，其餘 €20-30'
+},
+{num:3, date:'8/3（一）', city:'wien', caption:'美泉宮',
+  items:[
+    {time:'08:30', title:'飯店出發', note:'搭地鐵 U-Bahn 前往，建議避開人潮'},
+    {time:'09:00-12:30', title:'🏰 美泉宮 Schönbrunn Palace + 花園', note:'門票建議先線上預約', map:'Schönbrunn Palace'},
+    {time:'12:30-13:30', title:'午餐', note:'美泉宮周邊或返回市區'},
+    {time:'14:00-17:00', title:'Naschmarkt 市集 或 市區自由逛街', map:'Naschmarkt Vienna'},
+    {time:'17:30', title:'Café Demel 下午茶', note:'如未安排在Day4', map:'Café Demel Wien'},
+    {time:'晚上', title:'自由晚餐、早點休息'}
+  ],
+  budget:'門票 €22-26/人／交通 €8／餐飲 €40-50'
+},
+{num:4, date:'8/4（二）', city:'wien', caption:'內城區漫步日',
+  items:[
+    {time:'09:00-10:00', title:'🕍 聖史蒂芬大教堂 Stephansdom', map:'Stephansdom Vienna'},
+    {time:'10:00-11:30', title:'📚 奧地利國家圖書館', map:'Österreichische Nationalbibliothek'},
+    {time:'11:30-12:30', title:'Café Hawelka 咖啡／午餐', map:'Café Hawelka Wien'},
+    {time:'13:00-15:30', title:'🏛️ 藝術史博物館 Kunsthistorisches Museum', map:'Kunsthistorisches Museum Wien'},
+    {time:'16:00-17:00', title:'🎨 百水公寓 Hundertwasserhaus', note:'時間允許則前往', map:'Hundertwasserhaus Vienna'},
+    {time:'17:00-18:30', title:'Café Sacher 下午茶 或 自由活動'},
+    {time:'晚上', title:'早點休息，打包行李', note:'⚠️ 建議21:30前休息，隔天05:28早班車'}
+  ],
+  budget:'門票（藝術史博物館約€16-21/人）／交通 €8／餐飲 €40-50'
+},
+{num:5, date:'8/5（三）', city:'salzburg', caption:'前往薩爾茲堡・Hellbrunn＋Untersbergbahn', stay:'Cocoon Salzburg',
+  items:[
+    {time:'04:50', title:'起床、退房前準備', note:'⚠️ 早起注意鬧鐘'},
+    {time:'05:00', title:'前往 Wien Hbf', note:'建議提前叫車或確認地鐵首班時間'},
+    {time:'05:28', title:'🚄 火車出發 RJX19938', note:'Wien Hbf → Salzburg Hbf'},
+    {time:'07:53', title:'抵達 Salzburg Hbf'},
+    {time:'08:00', title:'行李寄放車站置物櫃'},
+    {time:'08:00左右', title:'🚌 搭25號公車出發', note:'不用轉車，直達'},
+    {time:'08:25左右', title:'抵達 Schloss Hellbrunn 站', note:'就在宮殿門口'},
+    {time:'08:30-10:30', title:'🏰 Schloss Hellbrunn', note:'惡作劇噴泉導覽 + 花園', map:'Schloss Hellbrunn'},
+    {time:'10:30', title:'搭下一班25號公車繼續往山區'},
+    {time:'10:45左右', title:'抵達 Grödig Untersbergbahn'},
+    {time:'10:45-12:45', title:'🚡 Untersbergbahn 纜車登山賞景', map:'Untersbergbahn'},
+    {time:'13:00左右', title:'搭25號公車直接返回 Salzburg Hbf', note:'全程約39分，不轉車'},
+    {time:'13:40', title:'抵達 Salzburg Hbf，取回行李，簡單午餐'},
+    {time:'15:00', title:'Cocoon Salzburg check-in', note:'Rainerstraße 29, 5020 Salzburg'},
+    {time:'15:30-16:00', title:'🌷 米拉貝爾宮花園', map:'Mirabell Palace Salzburg'},
+    {time:'16:00-16:30', title:'🎻 莫札特故居', map:'Mozart Wohnhaus Salzburg'},
+    {time:'16:30-17:00', title:'過橋往舊城區', note:'步行約15-20分'},
+    {time:'17:00-17:30', title:'🛍️ Getreidegasse', map:'Getreidegasse Salzburg'},
+    {time:'17:30-18:00', title:'⛪ 主教座堂 Dom zu Salzburg', map:'Salzburg Cathedral'},
+    {time:'18:00-19:00', title:'🚡 FestungsBahn + Hohensalzburg要塞', map:'Festung Hohensalzburg'},
+    {time:'19:00-19:30', title:'🌄 Richterhöhe 觀景台', map:'Richterhöhe Salzburg'},
+    {time:'19:30-21:00', title:'晚餐'},
+    {time:'21:00', title:'返回飯店休息', note:'⚠️ 睡眠約7.5小時，準備隔天06:35出發國王湖'}
+  ],
+  budget:'門票（Hellbrunn約€15/人、Untersbergbahn來回約€35/人）／交通（25號公車來回約€5/人）／餐飲 €40-50'
+},
+{num:6, date:'8/6（四）', city:'konig', caption:'國王湖一日遊 → 布達佩斯',
+  items:[
+    {time:'05:50', title:'起床、退房、寄放行李（如需要）'},
+    {time:'06:35', title:'🚌 搭840公車出發', note:'Salzburg Hbf'},
+    {time:'07:42', title:'抵達 Königssee', map:'Königssee'},
+    {time:'08:00', title:'⛴️ 搭首班船直達 Salet at Obersee', note:'船程約1小時'},
+    {time:'08:55', title:'抵達 Salet，步行往上湖 Obersee', note:'15-20分'},
+    {time:'09:15-13:00', title:'🥾 健行往返 Röthbach 瀑布', note:'德國最高瀑布，約3.5-4小時'},
+    {time:'13:20', title:'走回 Salet 碼頭'},
+    {time:'13:55', title:'⛴️ 搭船 Salet → St. Bartholomä', note:'船程20分'},
+    {time:'14:15-15:15', title:'⛪ 聖巴多羅買朝聖教堂', map:'St. Bartholomä Königssee'},
+    {time:'15:15', title:'⛴️ 搭船返回 Seelände', note:'船程35分'},
+    {time:'15:56', title:'🚌 搭840公車返回 Salzburg'},
+    {time:'17:04', title:'抵達 Salzburg Hbf', note:'緩衝時間充裕'},
+    {time:'17:04-18:00', title:'取回行李、簡單用餐'},
+    {time:'18:11', title:'🚄 火車出發 IC747→RJX261', note:'Salzburg → Wien → Budapest'},
+    {time:'00:29 (8/7)', title:'抵達 Budapest-Keleti'}
+  ],
+  budget:'公車票、船票（現場購買，約€30-35/人）／交通已含火車票／餐飲 €30-40',
+  tip:'建議事先線上購買國王湖船票避免現場排隊，也可考慮提早一班公車（06:05或更早）增加緩衝。'
+},
+{num:7, date:'8/7（五）', city:'budapest', caption:'抵達布達佩斯・城堡山區', stay:'NH Collection Budapest City Center',
+  items:[
+    {time:'00:29', title:'抵達 Budapest-Keleti'},
+    {time:'00:35', title:'步行前往 NH Collection Budapest', note:'約800公尺，10-12分鐘', map:'NH Collection Budapest City Center'},
+    {time:'01:00', title:'抵達飯店', note:'⚠️ 需事先與飯店確認能否深夜/凌晨提前入住，或先寄放行李於大廳休息區'},
+    {time:'上午', title:'補眠、晚點起床'},
+    {time:'13:00', title:'午餐'},
+    {time:'14:00-18:00', title:'🏰 Castle Hill 城堡山區', note:'漁人堡、馬提亞斯教堂、布達皇宮觀景台', map:'Castle Hill Budapest'},
+    {time:'18:30', title:'晚餐', note:'推薦 VakVarjú Restaurant 或 Horgásztanya Vendéglő（漁夫湯）'},
+    {time:'晚上', title:'鏈橋夜景散步', map:'Chain Bridge Budapest'}
+  ],
+  budget:'交通 €10／門票（漁人堡上層瞭望台約€3-5）／餐飲 €40-50'
+},
+{num:8, date:'8/8（六）', city:'budapest', caption:'布達佩斯市區',
+  items:[
+    {time:'09:00-10:30', title:'⛪ 聖史蒂芬聖殿 Szent István Bazilika', note:'可登頂看全景', map:'Szent István Bazilika'},
+    {time:'11:00-12:30', title:'🥘 中央市場 Nagycsarnok', note:'適合買紅椒粉、貴腐酒等伴手禮', map:'Nagycsarnok Budapest'},
+    {time:'12:30-13:30', title:'午餐', note:'市場內小吃或 Retró Lángos（炸麵包）'},
+    {time:'14:30-16:00', title:'🏛️ 英雄廣場 Hősök tere', map:'Hősök tere Budapest'},
+    {time:'16:00-17:30', title:'瓦茨街 Váci utca 逛街購物', map:'Váci utca Budapest'},
+    {time:'18:30', title:'晚餐', note:'紐約咖啡館 或 Paprika Vendéglő（鴨肝），建議提前訂位'},
+    {time:'晚上', title:'打包行李，準備隔天回程'}
+  ],
+  budget:'交通 €10／門票（聖殿登頂約€6）／餐飲 €40-50／伴手禮視個人採買'
+},
+{num:9, date:'8/9（日）', city:'budapest', caption:'返程',
+  items:[
+    {time:'08:00', title:'飯店退房', note:'Check-out 12:00前，但需早出發趕巴士'},
+    {time:'08:30', title:'前往 Budapest Népliget 巴士站', map:'Budapest Népliget bus station'},
+    {time:'09:25', title:'🚌 搭乘 FlixBus Route 260', note:'座位 11C / 11D'},
+    {time:'12:20', title:'抵達維也納國際機場', note:'準備搭機返程'}
+  ],
+  budget:'—'
+}
+];
+
+const TRANSPORT = [
+  {city:'wien', mode:'✈️', title:'國際航班抵達', from:'—', to:'Vienna International Airport', time:'8/1  06:55'},
+  {city:'wien', mode:'🚆', title:'CAT + S2', from:'機場', to:'Wien Hauptbahnhof', time:'8/1  約08:00'},
+  {city:'salzburg', mode:'🚄', title:'火車 RJX19938', from:'Wien Hbf', to:'Salzburg Hbf', time:'8/5  05:28→07:53'},
+  {city:'salzburg', mode:'🚌', title:'25號公車', from:'Salzburg Hbf', to:'Hellbrunn → Untersbergbahn', time:'8/5  08:00起'},
+  {city:'konig', mode:'🚌', title:'840號公車', from:'Salzburg Hbf', to:'Königssee', time:'8/6  06:35→07:42'},
+  {city:'konig', mode:'⛴️', title:'遊船', from:'Seelände', to:'Salet at Obersee', time:'8/6  08:00→08:55'},
+  {city:'konig', mode:'⛴️', title:'遊船', from:'Salet → St.Bartholomä', to:'Seelände', time:'8/6  13:55→16:10'},
+  {city:'konig', mode:'🚌', title:'840號公車', from:'Königssee', to:'Salzburg Hbf', time:'8/6  15:56→17:04'},
+  {city:'budapest', mode:'🚄', title:'火車 IC747 → RJX261', from:'Salzburg', to:'Wien → Budapest-Keleti', time:'8/6  18:11→00:29(+1)'},
+  {city:'wien', mode:'🚌', title:'FlixBus Route 260', from:'Budapest Népliget', to:'Vienna International Airport', time:'8/9  09:25→12:20'}
+];
+
+const STAYS = [
+  {city:'wien', name:'Leonardo Hotel Vienna Hauptbahnhof', dates:'8/1 – 8/2（1晚）', addr:'Gerhard-Bronner-Straße 5, 1100 Vienna', code:'980010464', phone:'+49 30 439703600'},
+  {city:'wien', name:'Ibis Wien Messe', dates:'8/2 – 8/5（3晚）', addr:'Lassallestrasse 7a, 1020 Vienna', code:'QMJDBVXD', phone:'+43 1 217700'},
+  {city:'salzburg', name:'Cocoon Salzburg', dates:'8/5 – 8/6（1晚）', addr:'Rainerstraße 29, 5020 Salzburg', code:'514656181', phone:'—'},
+  {city:'budapest', name:'NH Collection Budapest City Center', dates:'8/6 – 8/9（3晚）', addr:'Osvát u. 2-8, 1073 Budapest', code:'0175633787', phone:'+36 1 42 44 700'}
+];
+
+const BOOKINGS = [
+  {type:'🎻', city:'wien', title:'Wiener Mozart Orchester 音樂會', detail:'Musikvereinsplatz 1, 1010 Wien', time:'8/1 20:15', code:'座位 15排 7、8、9號（3張）'},
+  {type:'🍖', city:'wien', title:'Ribs of Vienna 晚餐', detail:'Weihburggasse 22, 1010 Wien', time:'8/2 20:00-22:00', code:'3位訪客'},
+  {type:'🏨', city:'wien', title:'Leonardo Hotel Vienna Hauptbahnhof', detail:'訂房確認', time:'8/1-8/2', code:'980010464'},
+  {type:'🏨', city:'wien', title:'Ibis Wien Messe', detail:'訂房確認', time:'8/2-8/5', code:'QMJDBVXD'},
+  {type:'🚄', city:'salzburg', title:'火車 Wien → Salzburg', detail:'RJX19938 對號座', time:'8/5 05:28', code:'車票已購買（PDF）'},
+  {type:'🏨', city:'salzburg', title:'Cocoon Salzburg', detail:'訂房確認', time:'8/5-8/6', code:'514656181'},
+  {type:'🚄', city:'budapest', title:'火車 Salzburg → Budapest', detail:'IC747 / RJX261', time:'8/6 18:11', code:'車票已購買（PDF）'},
+  {type:'🏨', city:'budapest', title:'NH Collection Budapest', detail:'訂房確認', time:'8/6-8/9', code:'0175633787'},
+  {type:'🚌', city:'budapest', title:'FlixBus 回程', detail:'Budapest Népliget → Vienna Airport', time:'8/9 09:25', code:'337 397 4273'}
+];
+
+const PACKING = [
+  {group:'證件與文件', items:['護照（效期6個月以上）','各項訂票/訂房確認信（下載離線版或截圖）','旅遊保險保單','信用卡（含旅平險附加）、少量歐元現金']},
+  {group:'電子裝置', items:['歐規轉接頭 / 萬用轉接頭','行動電源','歐洲上網卡或漫遊方案']},
+  {group:'衣物', items:['8月中歐氣候約15-28°C，洋蔥式穿搭','健行裝備（8/6國王湖）：健行鞋、排汗衣、輕便雨具、帽子、防曬','音樂會/正式晚餐服裝（8/1、8/2）']},
+  {group:'其他', items:['水壺（健行/城市步行皆可用）','常備藥品','少量零食（火車長途移動用）']}
+];
+
+const INFO = [
+  {icon:'wifi', title:'網路', body:'建議抵達機場後直接購買歐盟通用上網卡（奧地利/德國/匈牙利皆可用），或開通國際漫遊。'},
+  {icon:'coin', title:'換匯', body:'奧地利、德國使用歐元（EUR）；匈牙利使用福林（HUF），信用卡在市區普遍可用，建議仍備少量現金應急（市場、小吃攤位）。'},
+  {icon:'shield', title:'保險', body:'建議確認信用卡附加的旅平險/不便險範圍，或另外投保涵蓋醫療、行李延誤、班機延誤的旅遊平安險。'},
+  {icon:'gift', title:'伴手禮推薦', sub:'維也納', list:['手工巧克力（在地人推薦款，非觀光客版）','莫札特巧克力球 Mozartkugel（可留到薩爾茲堡買更道地）','薩赫蛋糕 Sacher Torte（機場免稅店也有冷藏版）']},
+  {icon:'gift', title:'', sub:'布達佩斯', list:['紅椒粉 Paprika（中央市場買最道地）','貴腐酒 Tokaji（世界知名甜白酒）','Herend / Zsolnay 手工瓷器（精緻，適合送禮）','鵝肝醬罐頭（方便攜帶）','手工蕾絲／刺繡製品（中央市場二樓）']},
+  {icon:'alert', title:'其他提醒', list:['8/6 全天國王湖健行體力消耗大，建議準備充足水和輕食','8/6-8/7 深夜抵達布達佩斯需與 NH Collection 飯店確認提前入住或行李寄放事宜','各段火車票為紙本/PDF車票，建議手機截圖＋列印備用']}
+];
+
+/* ============================= ICONS ============================= */
+const ICONS = {
+  calendar:'<rect x="3" y="4.5" width="18" height="16" rx="3"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="8" y1="2.5" x2="8" y2="6.5"/><line x1="16" y1="2.5" x2="16" y2="6.5"/>',
+  train:'<rect x="5" y="4" width="14" height="14" rx="4"/><line x1="5" y1="12.5" x2="19" y2="12.5"/><circle cx="8.5" cy="19.5" r="1.4"/><circle cx="15.5" cy="19.5" r="1.4"/>',
+  home:'<path d="M4 11 L12 4 L20 11"/><path d="M6 10 V20 H18 V10"/><rect x="10" y="14" width="4" height="6"/>',
+  bag:'<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M9 8 V6 a3 3 0 0 1 6 0 v2"/>',
+  coin:'<circle cx="12" cy="12" r="9"/><path d="M12 7.5v9M9.5 9.5c0-1.2 1.1-2 2.5-2s2.5.9 2.5 2.1c0 2.9-5 1.3-5 4.1 0 1.2 1.1 2.1 2.5 2.1s2.5-.8 2.5-2"/>',
+  info:'<circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16.5"/><circle cx="12" cy="7.7" r="1"/>',
+  ticket:'<path d="M4 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4Z"/><line x1="13" y1="6" x2="13" y2="18" stroke-dasharray="2 2"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/>',
+  wifi:'<path d="M4.5 10a11 11 0 0 1 15 0"/><path d="M7.5 13.2a7 7 0 0 1 9 0"/><path d="M10.3 16.3a3 3 0 0 1 3.4 0"/><circle cx="12" cy="19" r="1"/>',
+  shield:'<path d="M12 3l7 3v6c0 5-3.4 8-7 9-3.6-1-7-4-7-9V6z"/>',
+  alert:'<path d="M12 3 21 19 H3 Z"/><line x1="12" y1="9.5" x2="12" y2="13.5"/><circle cx="12" cy="16.3" r="0.9"/>',
+  gift:'<rect x="4" y="9.5" width="16" height="10.5" rx="1.5"/><path d="M4 9.5V7.8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.7"/><line x1="12" y1="5.8" x2="12" y2="20"/><path d="M12 5.8c-1.2-2.6-5.3-2.3-5 .3.2 1.6 3 1.7 5-.3Z"/><path d="M12 5.8c1.2-2.6 5.3-2.3 5 .3-.2 1.6-3 1.7-5-.3Z"/>',
+  arrow:'<line x1="4" y1="12" x2="18" y2="12"/><polyline points="12,6 18,12 12,18"/>'
+};
+function icon(name, extra){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" '+(extra||'')+'>'+ICONS[name]+'</svg>'; }
+
+/* ============================= STATE ============================= */
+let activeTab = 'itinerary';
+let activeDay = 1;
+const checkedPacking = {};
+
+const TABS = [
+  {id:'itinerary', label:'行程', icon:'calendar'},
+  {id:'transport', label:'交通', icon:'train'},
+  {id:'stay', label:'住宿', icon:'home'},
+  {id:'bookings', label:'訂單', icon:'ticket'},
+  {id:'packing', label:'行李', icon:'bag'},
+  {id:'budget', label:'預算', icon:'coin'},
+  {id:'info', label:'資訊', icon:'info'}
+];
+
+/* ============================= RENDER: HEADER STEPPER ============================= */
+const ROUTE_CITY_MAP = {wien:'wien', salzburg:'salzburg', konig:'salzburg', budapest:'budapest'};
+function renderRoute(){
+  const el = document.getElementById('routeLine');
+  const curCity = ROUTE_CITY_MAP[cityOfDay(activeDay)];
+  el.innerHTML = ROUTE.map((r,i)=>{
+    const active = (activeTab==='itinerary' && activeDay!==9 && curCity===r.city && r.id!=='return') || (activeTab==='itinerary' && activeDay===9 && r.id==='return');
+    return `<button class="route-node ${active?'active':''}" style="--dot-color:${CITY[r.city].color}" onclick="jumpCity('${r.id}')">
+      <span class="route-dot"></span>
+      <span class="route-label">${r.label}</span>
+    </button>`;
+  }).join('');
+}
+function cityOfDay(n){ return DAYS.find(d=>d.num===n).city; }
+function jumpCity(id){
+  activeTab='itinerary';
+  if(id==='wien') activeDay=1;
+  if(id==='salzburg') activeDay=5;
+  if(id==='budapest') activeDay=7;
+  if(id==='return') activeDay=9;
+  renderAll();
+}
+
+/* ============================= RENDER: BOTTOM NAV ============================= */
+function renderNav(){
+  const el = document.getElementById('bottomNav');
+  el.innerHTML = TABS.map(t=>`
+    <button class="nav-btn ${activeTab===t.id?'active':''}" onclick="setTab('${t.id}')">
+      ${icon(t.icon)}
+      <span>${t.label}</span>
+    </button>`).join('');
+}
+function setTab(id){ activeTab=id; renderAll(); }
+
+/* ============================= RENDER: PAGES ============================= */
+function renderMain(){
+  const el = document.getElementById('main');
+  if(activeTab==='itinerary') el.innerHTML = pageItinerary();
+  else if(activeTab==='transport') el.innerHTML = pageTransport();
+  else if(activeTab==='stay') el.innerHTML = pageStay();
+  else if(activeTab==='bookings') el.innerHTML = pageBookings();
+  else if(activeTab==='packing') el.innerHTML = pagePacking();
+  else if(activeTab==='budget') el.innerHTML = pageBudget();
+  else if(activeTab==='info') el.innerHTML = pageInfo();
+}
+
+function pageItinerary(){
+  const d = DAYS.find(x=>x.num===activeDay);
+  const c = CITY[d.city];
+  const pills = DAYS.map(x=>`<button class="day-pill ${x.num===activeDay?'active':''}"
+      style="${x.num===activeDay?'background:'+CITY[x.city].color:''}" onclick="goDay(${x.num})">Day ${x.num}</button>`).join('');
+  const items = d.items.map(it=>`
+    <div class="t-item" style="--dot-color:${c.color}">
+      <span class="t-dot" style="--dot-color:${c.color}"></span>
+      <div class="t-time">${it.time}</div>
+      <div class="t-title">${it.title}</div>
+      ${it.note?`<div class="t-note">${it.note}</div>`:''}
+      ${it.map?`<a class="t-map" style="--dot-color:${c.color};--chip-bg:${c.soft}" href="${mapUrl(it.map)}" target="_blank" rel="noopener">${icon('pin')} 開啟導航</a>`:''}
+    </div>`).join('');
+  return `
+    <div class="day-pills">${pills}</div>
+    <div class="day-header">
+      <span class="day-num">${String(d.num).padStart(2,'0')}</span>
+      <div class="day-meta">
+        <span class="day-city" style="color:${c.color}">${c.label}</span>
+        <span class="day-date">${d.date}</span>
+      </div>
+    </div>
+    <div class="day-caption">${d.caption}</div>
+    <div class="timeline">${items}</div>
+    ${d.tip? `<div class="day-foot">💡 ${d.tip}</div>`:''}
+    <div class="day-foot"><b>預估花費：</b>${d.budget}${d.stay?`<br><b>住宿：</b>${d.stay}`:''}</div>
+  `;
+}
+function goDay(n){ activeDay=n; renderAll(); document.getElementById('main').scrollTop=0; }
+
+function pageTransport(){
+  const rows = TRANSPORT.map(t=>{
+    const c = CITY[t.city];
+    return `<div class="card">
+      <div class="card-head">
+        <div class="card-icon" style="--chip-bg:${c.soft}; --dot-color:${c.color}">${icon('train')}</div>
+        <div><div class="card-title">${t.mode} ${t.title}</div><div class="card-sub">${t.time}</div></div>
+      </div>
+      <div class="kv"><span class="k">起</span><span class="v">${t.from}</span></div>
+      <div class="kv"><span class="k">訖</span><span class="v">${t.to}</span></div>
+    </div>`;
+  }).join('');
+  return `<h2 class="page-title">交通總覽</h2><p class="page-sub">九天旅程的所有主要交通銜接，依時間順序排列。</p>${rows}`;
+}
+
+function pageStay(){
+  const rows = STAYS.map(s=>{
+    const c = CITY[s.city];
+    return `<div class="card">
+      <div class="card-head">
+        <div class="card-icon" style="--chip-bg:${c.soft}; --dot-color:${c.color}">${icon('home')}</div>
+        <div><div class="card-title">${s.name}</div><div class="card-sub">${s.dates}</div></div>
+      </div>
+      <div class="kv"><span class="k">地址</span><span class="v">${s.addr}</span></div>
+      <div class="kv"><span class="k">訂房號</span><span class="v">${s.code}</span></div>
+      <div class="kv"><span class="k">電話</span><span class="v">${s.phone}</span></div>
+      <a class="btn-link" style="--chip-bg:${c.soft}; --dot-color:${c.color}" href="${mapUrl(s.addr)}" target="_blank" rel="noopener">${icon('pin')} 開啟導航</a>
+    </div>`;
+  }).join('');
+  return `<h2 class="page-title">住宿總覽</h2><p class="page-sub">四間飯店的地址、訂房編號與聯絡方式。</p>${rows}`;
+}
+
+function pageBookings(){
+  const rows = BOOKINGS.map(b=>{
+    const c = CITY[b.city];
+    return `<div class="card">
+      <div class="card-head">
+        <div class="card-icon" style="--chip-bg:${c.soft}; --dot-color:${c.color}">${b.type}</div>
+        <div><div class="card-title">${b.title}</div><div class="card-sub">${b.time}</div></div>
+      </div>
+      <div class="kv"><span class="k">內容</span><span class="v">${b.detail}</span></div>
+      <div class="kv"><span class="k">確認碼</span><span class="v">${b.code}</span></div>
+    </div>`;
+  }).join('');
+  return `<h2 class="page-title">訂單票券</h2><p class="page-sub">所有已確認的訂票／訂房資訊，方便現場快速查找。</p>${rows}`;
+}
+
+function pagePacking(){
+  const total = PACKING.reduce((s,g)=>s+g.items.length,0);
+  const checkedCount = Object.values(checkedPacking).filter(Boolean).length;
+  const groups = PACKING.map((g,gi)=>`
+    <div class="pack-group">
+      <h3>${g.group}</h3>
+      ${g.items.map((it,ii)=>{
+        const key = gi+'-'+ii;
+        const on = checkedPacking[key];
+        return `<div class="pack-item ${on?'checked':''}" onclick="togglePack('${key}')">
+          <span class="pack-box">${on?checkSvg():''}</span>
+          <span class="pack-text">${it}</span>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+  return `<h2 class="page-title">行李清單</h2>
+    <p class="pack-progress">已勾選 ${checkedCount} / ${total} 項</p>
+    ${groups}`;
+}
+function checkSvg(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="5,13 10,18 19,7"/></svg>'; }
+function togglePack(key){ checkedPacking[key]=!checkedPacking[key]; renderMain(); }
+
+function pageBudget(){
+  const perDay = DAYS.map(d=>{
+    const nums = (d.budget.match(/€\s?(\d+)/g)||[]).map(x=>parseInt(x.replace(/[^\d]/g,'')));
+    const est = nums.length? Math.max(...nums) : 0;
+    return {num:d.num, city:d.city, est};
+  });
+  const maxEst = Math.max(...perDay.map(p=>p.est),1);
+  const rows = perDay.map(p=>`
+    <div class="bud-row">
+      <span class="bud-day">D${p.num}</span>
+      <div class="bud-bar-wrap"><div class="bud-bar" style="width:${(p.est/maxEst*100)}%; background:${CITY[p.city].color}"></div></div>
+      <span class="bud-amt">${p.est?'~€'+p.est+'/人':'—'}</span>
+    </div>`).join('');
+  return `<h2 class="page-title">預算總覽</h2>
+    <div class="budget-total">
+      <div class="label">全程粗估（不含機票／住宿／已付門票）</div>
+      <div class="amount">€ 350 – 480 / 人</div>
+      <div class="note">此為粗估花費區間，實際依用餐與購物習慣調整。可於下方查看各日細項預估。</div>
+    </div>
+    ${rows}`;
+}
+
+function pageInfo(){
+  const sections = INFO.map(s=>`
+    <div class="info-section">
+      ${s.title?`<h3>${icon(s.icon)} ${s.title}${s.sub?` <span style="color:var(--ink-faint);font-weight:600;">・${s.sub}</span>`:''}</h3>`:`<h3 style="margin-top:-6px;">${icon(s.icon)} <span style="color:var(--ink-faint);font-weight:600;">${s.sub}</span></h3>`}
+      ${s.body?`<p>${s.body}</p>`:''}
+      ${s.list?`<ul>${s.list.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}
+    </div>`).join('');
+  return `<h2 class="page-title">實用資訊</h2><p class="page-sub">出發前後的通用提醒與注意事項。</p>${sections}`;
+}
+
+/* ============================= INIT ============================= */
+function renderAll(){ renderRoute(); renderNav(); renderMain(); }
+renderAll();
+</script>
+</body>
+</html>
