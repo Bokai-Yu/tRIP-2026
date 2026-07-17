@@ -280,7 +280,7 @@ const DAYS = [
     {time:'08:10', title:'步行前往 Leonardo Hotel，寄放行李', note:'步行約5-8分鐘', map:'Leonardo Hotel Vienna Hauptbahnhof'},
     {time:'09:00-14:00', title:'自由活動', note:'長途飛行後不宜安排太緊湊，建議飯店附近輕鬆走走、補眠調時差'},
     {time:'15:00', title:'正式 Check-in', note:'Gerhard-Bronner-Straße 5, 1100 Vienna'},
-    {time:'15:30-18:30', title:'自由活動', note:'可安排 Café Sacher 喝咖啡、周邊散步', map:'Café Sacher Wien'},
+    {time:'15:30-18:30', title:'自由活動', note:'可安排 Café Sacher 喝咖啡、周邊散步；或考慮維也納國家歌劇院導覽（€18／約40分鐘，7-8月暑休無演出僅開放導覽）', map:'Café Sacher Wien'},
     {time:'19:00', title:'前往音樂協會 Musikverein', map:'Musikverein Wien'},
     {time:'20:15-22:00', title:'🎻 Wiener Mozart Orchester 音樂會', note:'3人（含友人）・Parterre rechts 排15 座7-9'},
     {time:'22:00後', title:'音樂會後晚餐或宵夜', note:'附近餐廳'}
@@ -292,7 +292,7 @@ const DAYS = [
     {time:'08:00-09:00', title:'🍳 飯店早餐（已訂）', note:'Leonardo Hotel'},
     {time:'09:00', title:'退房，行李寄放櫃檯'},
     {time:'09:15', title:'步行前往美景宮', note:'約15-20分鐘，Leonardo Hotel 就在附近'},
-    {time:'09:30-12:00', title:'🖼️ 美景宮 Belvedere（上宮）', note:'門票建議先線上預約', map:'Belvedere Vienna'},
+    {time:'09:30-12:00', title:'🖼️ 美景宮 Belvedere（上宮）', note:'門票€23/人，建議先線上預約', map:'Belvedere Vienna'},
     {time:'12:00-13:00', title:'午餐'},
     {time:'13:00-13:30', title:'步行返回 Leonardo Hotel，取回行李'},
     {time:'13:30-14:00', title:'前往 Ibis Wien Messe 辦理入住', note:'Lassallestrasse 7a, 1020 Vienna，15:00後正式入住'},
@@ -311,17 +311,18 @@ const DAYS = [
     {time:'12:30-13:30', title:'午餐', note:'美泉宮周邊或返回市區'},
     {time:'14:00-17:00', title:'Naschmarkt 市集 或 市區自由逛街', map:'Naschmarkt Vienna'},
     {time:'17:30', title:'Café Demel 下午茶', note:'如未安排在Day4', map:'Café Demel Wien'},
-    {time:'晚上', title:'自由晚餐、早點休息'}
+    {time:'19:00-20:30', title:'晚餐'},
+    {time:'21:00-21:45', title:'（可選）沃蒂夫教堂光影秀 Light of Creation', note:'€22-27／Votivkirche・Time Travel Vienna製作，天黑後最佳觀賞時間', map:'Votivkirche Vienna'}
   ],
   budget:'門票 €22-26/人／交通 €8／餐飲 €40-50'
 },
 {num:4, date:'8/4（二）', city:'wien', caption:'內城區漫步日',
   items:[
-    {time:'09:00-10:00', title:'🕍 聖史蒂芬大教堂 Stephansdom', map:'Stephansdom Vienna'},
-    {time:'10:00-11:30', title:'📚 奧地利國家圖書館', map:'Österreichische Nationalbibliothek'},
+    {time:'09:00-10:00', title:'🕍 聖史蒂芬大教堂 Stephansdom', note:'免費入場；導覽€7、地下墓穴€7、登塔€7（皆可自由加選）', map:'Stephansdom Vienna'},
+    {time:'10:00-11:30', title:'📚 奧地利國家圖書館', note:'門票€12/人', map:'Österreichische Nationalbibliothek'},
     {time:'11:30-12:30', title:'Café Hawelka 咖啡／午餐', map:'Café Hawelka Wien'},
-    {time:'13:00-15:30', title:'🏛️ 藝術史博物館 Kunsthistorisches Museum', map:'Kunsthistorisches Museum Wien'},
-    {time:'16:00-17:00', title:'🎨 百水公寓 Hundertwasserhaus', note:'時間允許則前往', map:'Hundertwasserhaus Vienna'},
+    {time:'13:00-15:30', title:'🏛️ 藝術史博物館 Kunsthistorisches Museum', note:'門票€22/人', map:'Kunsthistorisches Museum Wien'},
+    {time:'16:00-17:00', title:'🎨 百水公寓 Hundertwasserhaus', note:'外觀免費參觀；時間允許則前往', map:'Hundertwasserhaus Vienna'},
     {time:'17:00-18:30', title:'Café Sacher 下午茶 或 自由活動'},
     {time:'晚上', title:'早點休息，打包行李', note:'⚠️ 建議21:30前休息，隔天05:28早班車'}
   ],
@@ -361,9 +362,9 @@ const DAYS = [
 {num:6, date:'8/6（四）', city:'konig', caption:'國王湖一日遊 → 布達佩斯',
   items:[
     {time:'05:50', title:'起床、退房、寄放行李（如需要）'},
-    {time:'06:35', title:'🚌 搭840公車出發', note:'Salzburg Hbf'},
+    {time:'06:35', title:'🚌 搭840公車出發', note:'Salzburg Hbf J月台搭乘，車資€15/人（現金）'},
     {time:'07:42', title:'抵達 Königssee', map:'Königssee'},
-    {time:'08:00', title:'⛴️ 搭首班船直達 Salet at Obersee', note:'船程約1小時'},
+    {time:'08:00', title:'⛴️ 搭首班船直達 Salet at Obersee', note:'船程約1小時／Seelände↔Salet來回約€30/人'},
     {time:'08:55', title:'抵達 Salet，步行往上湖 Obersee', note:'15-20分'},
     {time:'09:15-13:00', title:'🥾 健行往返 Röthbach 瀑布', note:'德國最高瀑布，約3.5-4小時'},
     {time:'13:20', title:'走回 Salet 碼頭'},
@@ -457,6 +458,7 @@ const PACKING = [
 const INFO = [
   {icon:'wifi', title:'網路', body:'建議抵達機場後直接購買歐盟通用上網卡（奧地利/德國/匈牙利皆可用），或開通國際漫遊。'},
   {icon:'coin', title:'換匯', body:'奧地利、德國使用歐元（EUR）；匈牙利使用福林（HUF），信用卡在市區普遍可用，建議仍備少量現金應急（市場、小吃攤位）。'},
+  {icon:'ticket', title:'省錢提示', body:'Vienna City Card（7天版€39）內含市區大眾運輸＋多項景點折扣，如果維也納天數安排較密集的博物館／景點行程，可以評估是否划算。'},
   {icon:'shield', title:'保險', body:'建議確認信用卡附加的旅平險/不便險範圍，或另外投保涵蓋醫療、行李延誤、班機延誤的旅遊平安險。'},
   {icon:'gift', title:'伴手禮推薦', sub:'維也納', list:['手工巧克力（在地人推薦款，非觀光客版）','莫札特巧克力球 Mozartkugel（可留到薩爾茲堡買更道地）','薩赫蛋糕 Sacher Torte（機場免稅店也有冷藏版）']},
   {icon:'gift', title:'', sub:'布達佩斯', list:['紅椒粉 Paprika（中央市場買最道地）','貴腐酒 Tokaji（世界知名甜白酒）','Herend / Zsolnay 手工瓷器（精緻，適合送禮）','鵝肝醬罐頭（方便攜帶）','手工蕾絲／刺繡製品（中央市場二樓）']},
